@@ -1,0 +1,27 @@
+name: Scrape PX Center Vagas
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # Roda todo dia às 9h
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - run: pip install requests beautifulsoup4 feedgen
+      - run: python scraper.py
+      - run: python json_to_rss.py
+      
+      - name: Commit changes
+        run: |
+          git config --local user.name "bot"
+          git config --local user.email "bot@example.com"
+          git add vagas.json feed.xml
+          git commit -m "Update vagas $(date)"
+          git push
